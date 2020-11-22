@@ -1,0 +1,1 @@
+sudo docker rm -f openpaimarketplace_rest_server openpaimarketplace_webportal_plugin postgres_for_openpaimarketplace_rest_server nginx

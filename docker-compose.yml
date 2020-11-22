@@ -1,0 +1,52 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License
+version: "3"
+services:
+  openpaimarketplace_rest_server:
+    container_name: openpaimarketplace_rest_server
+    image: siaimes_rest_server:v1.2.0
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      DB_USERNAME: user
+      DATABASE: marketplace
+      DB_PASSWORD: postgre
+      DB_HOST: postgres
+      DB_PORT: 5432
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    working_dir: /usr/src/app/openpaimarketplace/rest_server
+    command: ["npm", "start"]
+
+  postgres:
+    container_name: postgres_for_openpaimarketplace_rest_server
+    image: postgres:11.2-alpine
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: postgre
+      POSTGRES_DB: marketplace
+
+  openpaimarketplace_webportal_plugin:
+    container_name: openpaimarketplace_webportal_plugin
+    image: siaimes_webportal_plugin:v1.2.0
+    restart: always
+    ports:
+      - "9292:9292"
+
+  nginx:
+    restart: always
+    container_name: nginx
+    image: nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ~/openpaimarketplace/nginx:/etc/nginx/conf.d
+      - ~/openpaimarketplace/nginx/ssl:/etc/nginx/ssl
+      - ~/openpaimarketplace/nginx/log:/var/log/nginx
