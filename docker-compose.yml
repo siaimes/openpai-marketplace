@@ -4,7 +4,7 @@ version: "3"
 services:
   openpaimarketplace_rest_server:
     container_name: openpaimarketplace_rest_server
-    image: siaimes_rest_server:v1.2.0
+    image: openpai/pai-marketplace-restserver:v1.4.1
     restart: always
     depends_on:
       - postgres
@@ -15,27 +15,31 @@ services:
       DB_HOST: postgres
       DB_PORT: 5432
       NODE_ENV: production
-      PORT: 3000
+      PORT: 9293
     ports:
-      - "3000:3000"
+      - "9293:9293"
     working_dir: /usr/src/app/openpaimarketplace/rest_server
     command: ["npm", "start"]
 
   postgres:
     container_name: postgres_for_openpaimarketplace_rest_server
-    image: postgres:11.2-alpine
+    image: postgres:12.0
     restart: always
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: postgre
       POSTGRES_DB: marketplace
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
 
   openpaimarketplace_webportal_plugin:
     container_name: openpaimarketplace_webportal_plugin
-    image: siaimes_webportal_plugin:v1.2.0
+    image: openpai/pai-marketplace-webportal:v1.4.1
     restart: always
+    environment:
+      MARKETPLACE_API_URL: https://MasterIP:8443/openpaimarketplace_rest_server
     ports:
       - "9292:9292"
 
@@ -44,9 +48,9 @@ services:
     container_name: nginx
     image: nginx
     ports:
-      - 80:80
-      - 443:443
+      - 8080:80
+      - 8443:443
     volumes:
-      - ~/openpaimarketplace/nginx:/etc/nginx/conf.d
-      - ~/openpaimarketplace/nginx/ssl:/etc/nginx/ssl
-      - ~/openpaimarketplace/nginx/log:/var/log/nginx
+      - ./nginx:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/log:/var/log/nginx
